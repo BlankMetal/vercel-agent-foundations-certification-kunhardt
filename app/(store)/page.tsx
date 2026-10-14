@@ -100,6 +100,7 @@ async function FeaturedProducts() {
                 ? {
                     href: `/products/${hero.id}`,
                     name: hero.name,
+                    category: hero.category.replace(/-/g, " "),
                     image: hero.images[0],
                     priceLabel: formatPrice(hero.price, hero.currency),
                   }

@@ -249,6 +249,89 @@
   transition: translate 900ms cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
+/* The hero eye. The iris follows --gx/--gy (viewBox units, set from the
+ * pointer); a short transition reads as a saccade. The blink squashes the
+ * whole eye about its centre, holding open for most of the cycle. */
+.eye-gaze {
+  transform: translate(calc(var(--gx, 0) * 1px), calc(var(--gy, 0) * 1px));
+  transition: transform 260ms cubic-bezier(0.3, 0.7, 0.2, 1);
+}
+@keyframes eye-blink {
+  0%, 93%, 100% { transform: scaleY(1); }
+  95.5% { transform: scaleY(0.04); }
+}
+.eye-blink {
+  transform-origin: 300px 300px;
+  animation: eye-blink 6.5s ease-in-out infinite;
+}
+
+/* Hero eye, lit state: hovering the composition, or focusing its card link,
+ * centres the gaze, lifts the pupil off an ink shadow, fans the beam out,
+ * then shows the product card. Each step waits for the one before; the base
+ * state reverses the order on the way out. The gaze centres so the pupil
+ * sits on the beam's apex, and the blink stops so the eye stays open. */
+.eye-pupil,
+.eye-pupil-image {
+  transform-box: fill-box;
+  transform-origin: center;
+  transition: scale 600ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.eye-shadow {
+  opacity: 0;
+  transition:
+    opacity 400ms ease,
+    translate 600ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.eye-fan {
+  transform-box: view-box;
+  transform-origin: 300px 440px;
+  scale: 1 0;
+  opacity: 0;
+  transition:
+    scale 300ms cubic-bezier(0.7, 0, 0.8, 0.4),
+    opacity 200ms ease 100ms;
+}
+.eye-card {
+  pointer-events: none;
+  opacity: 0;
+  translate: 0 -10px;
+  transition:
+    opacity 180ms ease,
+    translate 300ms ease;
+}
+
+.eye-hover:is(:hover, :has(a:focus-visible)) .eye-gaze {
+  transform: none;
+}
+.eye-hover:is(:hover, :has(a:focus-visible)) .eye-pupil {
+  scale: 1.035;
+}
+.eye-hover:is(:hover, :has(a:focus-visible)) .eye-pupil-image {
+  scale: 1.08;
+}
+.eye-hover:is(:hover, :has(a:focus-visible)) .eye-shadow {
+  opacity: 1;
+  translate: 7px 7px;
+}
+.eye-hover:is(:hover, :has(a:focus-visible)) .eye-fan {
+  scale: 1 1;
+  opacity: 1;
+  transition:
+    scale 650ms cubic-bezier(0.2, 0.8, 0.2, 1) 120ms,
+    opacity 150ms ease 120ms;
+}
+.eye-hover:is(:hover, :has(a:focus-visible)) .eye-card {
+  pointer-events: auto;
+  opacity: 1;
+  translate: 0 0;
+  transition:
+    opacity 300ms ease 480ms,
+    translate 500ms cubic-bezier(0.2, 0.8, 0.2, 1) 480ms;
+}
+.eye-hover:is(:hover, :has(a:focus-visible)) .eye-blink {
+  animation: none;
+}
+
 /* Theme toggle glyph: half-filled disc rotates to show the other half. */
 .theme-glyph {
   transition: rotate 700ms cubic-bezier(0.7, 0, 0.2, 1);
@@ -260,6 +343,8 @@
 @media (prefers-reduced-motion: reduce) {
   .tile-turn,
   .iso-fall,
+  .eye-blink,
+  .eye-gaze,
   .parallax,
   [class*='animate-marquee'],
   [class*='animate-spin-slow'],
