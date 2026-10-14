@@ -1,11 +1,18 @@
 "use client";
 
-import { AgentChat } from "@/components/agent-chat";
+import dynamic from "next/dynamic";
 import {
   Sidebar,
   SidebarContent,
   SidebarHeader,
 } from "@/components/ui/sidebar";
+
+// The chat restores its history from localStorage, which the server can't
+// read, so it renders on the client only.
+const AgentChat = dynamic(
+  () => import("@/components/agent-chat").then((m) => m.AgentChat),
+  { ssr: false },
+);
 
 export function AgentSidebar() {
   return (
