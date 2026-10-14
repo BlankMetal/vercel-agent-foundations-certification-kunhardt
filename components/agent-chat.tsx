@@ -26,6 +26,9 @@ import { AgentProductCard } from "./agent-product-card";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { AgentErrorCard } from "./agent-error-card";
+import { AgentEmptyState } from "./agent-empty-state";
+import { PhaseGlyph, TileGlyph } from "./art/tiles";
+import { promptInputClass } from "./agent-prompt-class";
 
 type SearchedProduct = Extract<
   SearchProductsToolInvocation,
@@ -34,12 +37,18 @@ type SearchedProduct = Extract<
 
 function StatusLine({ children }: { children: React.ReactNode }) {
   return (
-    <div className="my-2 flex items-center gap-2 text-sm text-muted-foreground">
+    <div className="my-2 flex items-center gap-2.5 font-mono text-[11px] uppercase tracking-[0.16em] text-muted-foreground">
       <Spinner />
       <span>{children}</span>
     </div>
   );
 }
+
+const STARTERS = [
+  "Show me hoodies",
+  "What's good for a desk setup?",
+  "I want to return an order",
+];
 
 // True while the assistant is working but hasn't produced anything visible
 // yet: before the first chunk arrives, or while it is still reasoning.
@@ -148,6 +157,12 @@ export function AgentChat() {
     writeStorage(MESSAGES_KEY, null);
   };
 
+  const sendStarter = (text: string) => {
+    if (isBusy) return;
+    setRunId(undefined);
+    sendMessage({ text });
+  };
+
   const handleSubmit = (message: PromptInputMessage) => {
     if (isBusy || !input.trim()) return;
     // A request that fails before the server responds has no run ID, so clear
@@ -166,6 +181,16 @@ export function AgentChat() {
     <div className="flex h-full min-h-0 flex-col">
       <Conversation className="flex-1">
         <ConversationContent>
+          {messages.length === 0 && !error && (
+            <AgentEmptyState
+              eyebrow="Ship It Shop Agent"
+              title="What are you shipping today?"
+              description="Search the catalog, compare products, check stock, or start a return."
+              starters={STARTERS}
+              onStarter={sendStarter}
+              disabled={isBusy}
+            />
+          )}
           {messages.map((m) => {
             // The agent often runs several searches for one request (e.g. "hat",
             // then the hats category). Merge every successful search in the
@@ -228,7 +253,10 @@ export function AgentChat() {
                   }
                   if (p.state === "output-denied") {
                     return (
-                      <p key={`${m.id}-${i}`} className="my-2 text-sm text-muted-foreground">
+                      <p
+                        key={`${m.id}-${i}`}
+                        className="my-2 font-mono text-[11px] uppercase tracking-[0.16em] text-muted-foreground"
+                      >
                         Return cancelled.
                       </p>
                     );
@@ -238,7 +266,7 @@ export function AgentChat() {
                     return (
                       <div
                         key={`${m.id}-${i}`}
-                        className="my-2 rounded-lg border border-destructive/40 p-4 text-sm"
+                        className="my-2 border border-destructive/60 border-l-4 p-4 text-sm"
                       >
                         <p className="font-medium">
                           {notFound ? "We couldn't find this order" : "We couldn't start this return"}
@@ -249,11 +277,17 @@ export function AgentChat() {
                   }
                   if (p.state === "output-available" && "runId" in p.output) {
                     return (
-                      <div key={`${m.id}-${i}`} className="my-2 rounded-lg border p-4 text-sm">
-                        <p className="font-medium">Return started for order {p.input.orderId}</p>
-                        <p className="mt-1 text-muted-foreground">
-                          Status: processing. You'll get a confirmation once it's filed.
-                        </p>
+                      <div
+                        key={`${m.id}-${i}`}
+                        className="my-2 flex gap-3 border border-foreground p-4 text-sm"
+                      >
+                        <PhaseGlyph phase="full" className="mt-0.5" />
+                        <div>
+                          <p className="font-medium">Return started for order {p.input.orderId}</p>
+                          <p className="mt-1 text-muted-foreground">
+                            Status: processing. You'll get a confirmation once it's filed.
+                          </p>
+                        </div>
                       </div>
                     );
                   }
@@ -261,15 +295,24 @@ export function AgentChat() {
                     return (
                       <div
                         key={`${m.id}-${i}`}
-                        className="my-2 rounded-lg border p-4 text-sm"
+                        className="relative my-2 overflow-hidden border border-foreground p-4 text-sm"
                       >
-                        <p className="font-medium">Return order {p.input.orderId}?</p>
+                        <TileGlyph
+                          motif="quarter"
+                          rotate={90}
+                          className="absolute -top-px -right-px size-8"
+                        />
+                        <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+                          Confirm return
+                        </p>
+                        <p className="mt-1 font-medium">Return order {p.input.orderId}?</p>
                         <p className="mt-1 text-muted-foreground">
                           All items in this order will be returned. Reason: {p.input.reason}
                         </p>
                         <div className="mt-3 flex gap-2">
                           <Button
                             size="sm"
+                            className="rounded-full"
                             onClick={() =>
                               addToolApprovalResponse({ id: p.approval.id, approved: true })
                             }
@@ -279,6 +322,7 @@ export function AgentChat() {
                           <Button
                             size="sm"
                             variant="outline"
+                            className="rounded-full border-foreground"
                             onClick={() =>
                               addToolApprovalResponse({ id: p.approval.id, approved: false })
                             }
@@ -309,8 +353,8 @@ export function AgentChat() {
         <ConversationScrollButton />
       </Conversation>
 
-      <div className="border-t p-3">
-        <PromptInput onSubmit={handleSubmit}>
+      <div className="border-t border-foreground p-3">
+        <PromptInput onSubmit={handleSubmit} className={promptInputClass}>
           <PromptInputBody>
             <PromptInputTextarea
               value={input}

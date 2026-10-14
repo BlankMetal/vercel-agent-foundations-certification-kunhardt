@@ -2,34 +2,49 @@ import Link from "next/link";
 import { Search } from "lucide-react";
 import { AgentButton } from "@/components/agent-button";
 import { CartButton } from "@/components/cart-button";
+import { ShopMark } from "@/components/art/shop-mark";
+import { ThemeToggle } from "@/components/theme-toggle";
+import { headerIconClass } from "@/components/header-icon-class";
+
+const NAV = [
+  { href: "/search", label: "Catalog" },
+  { href: "/search?category=hoodies", label: "Hoodies" },
+  { href: "/search?category=mugs", label: "Mugs" },
+  { href: "/search?category=desk", label: "Desk" },
+];
 
 export function Header() {
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-border bg-background">
-      <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4">
-        <Link href="/" className="flex items-center gap-2">
-          <svg
-            className="h-5 w-5"
-            viewBox="0 0 76 65"
-            fill="currentColor"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path d="M37.5274 0L75.0548 65H0L37.5274 0Z" />
-          </svg>
-          <span className="font-semibold">Ship It Shop</span>
+    <header className="sticky top-0 z-50 w-full border-b border-border bg-background/80 backdrop-blur-md">
+      <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-6 px-4">
+        <Link href="/" className="group flex items-center gap-2.5">
+          <ShopMark />
+          <span className="text-[15px] font-semibold tracking-[-0.02em]">Ship It Shop</span>
         </Link>
 
-        <nav className="flex items-center gap-6">
-          <Link
-            href="/search"
-            className="text-muted-foreground transition-colors hover:text-foreground"
-            aria-label="Search products"
-          >
-            <Search className="h-5 w-5" />
+        <nav
+          aria-label="Shop"
+          className="hidden flex-1 items-center justify-center gap-7 font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground md:flex"
+        >
+          {NAV.map((item) => (
+            <Link
+              key={item.href}
+              href={item.href}
+              className="relative py-1 transition-colors after:absolute after:inset-x-0 after:-bottom-0.5 after:h-px after:origin-left after:scale-x-0 after:bg-foreground after:transition-transform after:duration-500 hover:text-foreground hover:after:scale-x-100"
+            >
+              {item.label}
+            </Link>
+          ))}
+        </nav>
+
+        <div className="flex items-center gap-0.5">
+          <Link href="/search" className={headerIconClass} aria-label="Search products">
+            <Search className="size-[18px]" />
           </Link>
           <CartButton />
           <AgentButton />
-        </nav>
+          <ThemeToggle />
+        </div>
       </div>
     </header>
   );

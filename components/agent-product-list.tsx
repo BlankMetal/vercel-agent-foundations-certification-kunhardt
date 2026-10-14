@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Spinner } from "@/components/ui/spinner";
 import { formatPrice } from "@/lib/format";
 import { getProductDetailsAction } from "@/lib/product-actions";
 import type { ProductDetailsData } from "@/lib/product-details";
@@ -69,7 +70,7 @@ export function ProductRows({ products }: { products: ProductRow[] }) {
       collapsible
       value={openId}
       onValueChange={handleOpenChange}
-      className="overflow-hidden rounded-lg border border-border bg-card"
+      className="overflow-hidden rounded-xl border border-foreground bg-card"
     >
       {products.map((product) => {
         const state = details[product.id];
@@ -82,7 +83,7 @@ export function ProductRows({ products }: { products: ProductRow[] }) {
               )}
             >
               {/* The thumbnail gives way to the card's full gallery when open. */}
-              <div className="relative size-14 shrink-0 overflow-hidden rounded-md bg-secondary group-data-[state=open]:hidden">
+              <div className="relative size-14 shrink-0 overflow-hidden rounded-full border border-border bg-secondary group-data-[state=open]:hidden">
                 {product.image && (
                   <Image
                     src={product.image}
@@ -97,7 +98,7 @@ export function ProductRows({ products }: { products: ProductRow[] }) {
                 <h3 className="truncate text-sm font-semibold leading-tight group-data-[state=open]:whitespace-normal group-data-[state=open]:text-base">
                   {product.name}
                 </h3>
-                <p className="text-xs text-muted-foreground group-data-[state=open]:text-sm group-data-[state=open]:font-semibold group-data-[state=open]:text-foreground">
+                <p className="font-mono text-xs text-muted-foreground group-data-[state=open]:text-sm group-data-[state=open]:font-semibold group-data-[state=open]:text-foreground">
                   {formatPrice(product.price, product.currency)}
                 </p>
               </div>
@@ -139,7 +140,8 @@ export function AgentProductList({ invocation }: AgentProductListProps) {
   ) {
     const query = invocation.input?.query;
     return (
-      <div className="rounded-lg border border-border bg-card p-4 text-sm text-muted-foreground">
+      <div className="flex items-center gap-2.5 rounded-xl border border-dashed border-foreground/50 bg-card p-4 font-mono text-[11px] uppercase tracking-[0.16em] text-muted-foreground">
+        <Spinner />
         Searching{query ? ` for "${query}"` : ""}…
       </div>
     );
@@ -153,7 +155,7 @@ export function AgentProductList({ invocation }: AgentProductListProps) {
 
   if ("error" in output && output.error) {
     return (
-      <div className="rounded-lg border border-destructive/30 bg-destructive/5 p-4 text-sm text-destructive">
+      <div className="rounded-xl border border-destructive/40 border-l-4 bg-destructive/5 p-4 text-sm text-destructive">
         {/* output.error is the raw API message; keep it out of the shopper's view. */}
         We couldn&apos;t load products right now. Please try again in a moment.
       </div>

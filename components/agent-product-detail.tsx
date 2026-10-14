@@ -32,7 +32,7 @@ function Gallery({ images, name, featured }: { images: string[]; name: string; f
           />
         )}
         {featured && (
-          <Badge className="absolute left-3 top-3 gap-1 shadow-sm">
+          <Badge className="absolute left-3 top-3 gap-1 rounded-full px-2.5 font-mono text-[10px] uppercase tracking-[0.16em]">
             <Sparkles />
             Featured
           </Badge>
@@ -48,7 +48,7 @@ function Gallery({ images, name, featured }: { images: string[]; name: string; f
               aria-label={`Show image ${i + 1} of ${images.length}`}
               aria-pressed={i === selected}
               className={cn(
-                "relative size-12 shrink-0 overflow-hidden rounded-md border bg-secondary transition",
+                "relative size-12 shrink-0 overflow-hidden rounded-full border bg-secondary transition",
                 i === selected
                   ? "border-foreground ring-1 ring-foreground"
                   : "border-border opacity-70 hover:opacity-100",
@@ -97,7 +97,7 @@ function AddToCart({ product, outOfStock }: { product: ProductDetailsData["produ
   };
 
   return (
-    <Button size="sm" className="flex-1" onClick={handleClick} disabled={outOfStock}>
+    <Button size="sm" className="flex-1 rounded-full" onClick={handleClick} disabled={outOfStock}>
       {added ? <Check /> : <ShoppingBag />}
       {outOfStock ? "Out of stock" : added ? "Added to cart" : "Add to cart"}
     </Button>
@@ -107,13 +107,13 @@ function AddToCart({ product, outOfStock }: { product: ProductDetailsData["produ
 function RelatedProducts({ products }: { products: ProductDetailsData["related"] }) {
   return (
     <div className="border-t border-border p-4">
-      <p className="text-xs font-medium text-muted-foreground">You might also like</p>
+      <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">You might also like</p>
       <div className="-mx-1 mt-2 flex gap-2 overflow-x-auto px-1 pb-1">
         {products.map((p) => (
           <Link
             key={p.id}
             href={`/products/${p.slug}`}
-            className="w-28 shrink-0 overflow-hidden rounded-md border border-border transition-colors hover:border-foreground/20"
+            className="w-28 shrink-0 overflow-hidden rounded-lg border border-border transition-colors hover:border-foreground"
           >
             <div className="relative aspect-square bg-secondary">
               {p.image && (
@@ -122,7 +122,7 @@ function RelatedProducts({ products }: { products: ProductDetailsData["related"]
             </div>
             <div className="p-2">
               <p className="line-clamp-2 text-xs font-medium">{p.name}</p>
-              <p className="mt-0.5 text-xs text-muted-foreground">
+              <p className="mt-0.5 font-mono text-xs text-muted-foreground">
                 {formatPrice(p.price, p.currency)}
               </p>
             </div>
@@ -156,7 +156,7 @@ export function ProductDetailView({ data, showHeader = true }: ProductDetailView
                 {product.category.replace(/-/g, " ")}
               </p>
               <h3 className="mt-0.5 text-base font-semibold leading-tight">{product.name}</h3>
-              <p className="mt-1 text-lg font-semibold tabular-nums">
+              <p className="mt-1 font-mono text-lg tabular-nums">
                 {formatPrice(product.price, product.currency)}
               </p>
             </div>
@@ -171,7 +171,7 @@ export function ProductDetailView({ data, showHeader = true }: ProductDetailView
             {product.tags.slice(0, 6).map((tag) => (
               <span
                 key={tag}
-                className="rounded-full bg-secondary px-2 py-0.5 text-xs text-muted-foreground"
+                className="rounded-full border border-border px-2 py-0.5 text-xs text-muted-foreground"
               >
                 {tag}
               </span>
@@ -180,7 +180,7 @@ export function ProductDetailView({ data, showHeader = true }: ProductDetailView
         )}
         <div className="flex gap-2 pt-1">
           <AddToCart product={product} outOfStock={stock?.inStock === false} />
-          <Button asChild size="sm" variant="outline" className="flex-1">
+          <Button asChild size="sm" variant="outline" className="flex-1 rounded-full border-foreground">
             <Link href={`/products/${product.slug}`}>View product</Link>
           </Button>
         </div>

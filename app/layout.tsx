@@ -1,10 +1,13 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
+import { AmbientField } from "@/components/art/ambient-field";
+import { ThemeProvider } from "@/components/theme-provider";
 import "./globals.css";
 
-const _geist = Geist({ subsets: ["latin"] });
-const _geistMono = Geist_Mono({ subsets: ["latin"] });
+// Exposed as CSS variables; globals.css maps them onto --font-sans/--font-mono.
+const geist = Geist({ subsets: ["latin"], variable: "--font-geist-sans" });
+const geistMono = Geist_Mono({ subsets: ["latin"], variable: "--font-geist-mono" });
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
 const SITE_NAME = "Ship It Shop";
@@ -45,9 +48,13 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className="bg-background">
+    // next-themes sets the theme class on <html> before hydration.
+    <html lang="en" className={`${geist.variable} ${geistMono.variable}`} suppressHydrationWarning>
       <body className="font-sans antialiased">
-        {children}
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+          <AmbientField />
+          {children}
+        </ThemeProvider>
         {process.env.NODE_ENV === "production" && <Analytics />}
       </body>
     </html>

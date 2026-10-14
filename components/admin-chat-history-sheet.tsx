@@ -11,11 +11,12 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
+import { TileField } from "@/components/art/tiles";
 
 // The pull tab on the drawer's edge. The closed rail and the open drawer use
 // the same shape so it reads as one handle that moves with the drawer.
 const TAB =
-  "flex h-14 w-5 items-center justify-center rounded-r-md border border-l-0 bg-background text-muted-foreground shadow-sm transition-colors [&_svg]:size-4";
+  "flex h-16 w-7 items-center justify-center rounded-r-full bg-foreground pr-1 text-background transition-[width] [&_svg]:size-4";
 
 const relativeTime = new Intl.RelativeTimeFormat("en-US", { numeric: "auto" });
 
@@ -62,13 +63,13 @@ export function AdminChatHistorySheet({
           type="button"
           aria-label="Open chat history"
           onClick={() => onOpenChange(true)}
-          className="group fixed inset-y-0 left-0 z-40 w-2 border-r bg-muted transition-[width] hover:w-3 focus-visible:w-3 focus-visible:outline-none motion-reduce:transition-none"
+          className="group fixed inset-y-0 left-0 z-40 w-1.5 bg-foreground transition-[width] hover:w-2.5 focus-visible:w-2.5 focus-visible:outline-none motion-reduce:transition-none"
         >
           <span
             aria-hidden="true"
             className={cn(
               TAB,
-              "absolute top-1/2 left-full -translate-y-1/2 group-hover:bg-muted group-hover:text-foreground group-focus-visible:ring-2 group-focus-visible:ring-ring",
+              "absolute top-1/2 left-full -translate-y-1/2 group-hover:w-8 group-focus-visible:ring-2 group-focus-visible:ring-ring",
             )}
           >
             <ChevronRight />
@@ -76,26 +77,36 @@ export function AdminChatHistorySheet({
         </button>
       )}
       <Sheet open={open} onOpenChange={onOpenChange}>
-        <SheetContent side="left" className="gap-0 p-0">
+        <SheetContent side="left" className="gap-0 border-r-foreground p-0">
           <button
             type="button"
             aria-label="Close chat history"
             onClick={() => onOpenChange(false)}
             className={cn(
               TAB,
-              "absolute top-1/2 left-full -translate-y-1/2 hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none",
+              "absolute top-1/2 left-full -translate-y-1/2 hover:w-8 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none",
             )}
           >
             <ChevronLeft />
           </button>
-          <SheetHeader className="border-b">
-            <SheetTitle>Chat history</SheetTitle>
+          <SheetHeader className="gap-2 px-5 pt-6 pb-5">
+            <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-muted-foreground">
+              Archive
+            </p>
+            <SheetTitle className="text-3xl font-semibold tracking-[-0.04em]">Chat history</SheetTitle>
             <SheetDescription>Saved in this browser only.</SheetDescription>
           </SheetHeader>
+          <TileField
+            cols={10}
+            rows={1}
+            seed={`history-${conversations.length}`}
+            animate={0.4}
+            className="aspect-[10/1] w-full border-y border-foreground"
+          />
 
           <div className="border-b p-3">
             <Button
-              className="w-full"
+              className="h-10 w-full rounded-full"
               size="sm"
               onClick={onNew}
               disabled={busy}
@@ -130,14 +141,15 @@ export function AdminChatHistorySheet({
                         disabled={busy && !active}
                         aria-current={active ? "page" : undefined}
                         className={cn(
-                          "flex w-full flex-col items-start gap-0.5 rounded-md py-2 pr-10 pl-3 text-left text-sm transition-colors hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50",
-                          active && "bg-muted",
+                          "relative flex w-full flex-col items-start gap-0.5 rounded-lg py-2.5 pr-10 pl-4 text-left text-sm transition-colors hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50",
+                          active &&
+                            "bg-muted before:absolute before:top-1/2 before:left-1 before:h-5 before:w-1 before:-translate-y-1/2 before:rounded-full before:bg-foreground",
                         )}
                       >
                         <span className="line-clamp-1 font-medium">
                           {c.title}
                         </span>
-                        <span className="text-xs text-muted-foreground">
+                        <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
                           {formatUpdated(c.updatedAt)}
                         </span>
                       </button>

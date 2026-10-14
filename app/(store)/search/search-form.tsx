@@ -3,7 +3,8 @@
 import { useEffect, useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
 import Form from "next/form"
-import { Loader2, Search, X } from "lucide-react"
+import { Search, X } from "lucide-react"
+import { Spinner } from "@/components/ui/spinner"
 import { Input } from "@/components/ui/input"
 import {
   Select,
@@ -86,19 +87,19 @@ export function SearchForm({
       action="/search"
       className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"
     >
-      <div className="relative w-full sm:max-w-sm">
-        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+      <div className="relative w-full sm:max-w-md">
+        <Search className="absolute left-5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
         <Input
           type="text"
           name="q"
           placeholder="Search products..."
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          className="pl-10 pr-10"
+          className="h-12 rounded-full border-foreground bg-background pl-12 pr-12 text-base shadow-none md:text-sm"
         />
         {isPending ? (
-          <Loader2
-            className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-muted-foreground"
+          <Spinner
+            className="absolute right-5 top-1/2 -translate-y-1/2 text-muted-foreground"
             aria-label="Searching"
           />
         ) : (
@@ -106,7 +107,7 @@ export function SearchForm({
             <button
               type="button"
               onClick={handleClear}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground transition-colors hover:text-foreground"
+              className="absolute right-5 top-1/2 -translate-y-1/2 text-muted-foreground transition-colors hover:text-foreground"
               aria-label="Clear search"
             >
               <X className="h-4 w-4" />
@@ -120,7 +121,7 @@ export function SearchForm({
         value={category || ALL_VALUE}
         onValueChange={handleCategoryChange}
       >
-        <SelectTrigger className="w-full sm:w-56">
+        <SelectTrigger className="w-full rounded-full border-foreground bg-background px-5 shadow-none data-[size=default]:h-12 sm:w-60">
           <SelectValue placeholder="All categories" />
         </SelectTrigger>
         <SelectContent>

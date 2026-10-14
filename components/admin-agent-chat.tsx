@@ -28,6 +28,8 @@ import { SquarePen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { AgentErrorCard } from "./agent-error-card";
+import { AgentEmptyState } from "./agent-empty-state";
+import { promptInputClass } from "./agent-prompt-class";
 
 const SUGGESTIONS = [
   "Show me low-stock items",
@@ -125,6 +127,13 @@ export function AdminAgentChat({
     <div className="flex h-full min-h-0 flex-col">
       <Conversation className="flex-1">
         <ConversationContent>
+          {messages.length === 0 && !error && (
+            <AgentEmptyState
+              eyebrow="Store admin agent"
+              title="Run the shop from here."
+              description="Ask about sales, returns, inventory, or support tickets. The agent can crunch numbers in a sandbox."
+            />
+          )}
           {messages.map((m) =>
             m.parts.map((p, i) => {
               switch (p.type) {
@@ -144,24 +153,15 @@ export function AdminAgentChat({
                   return (
                     <div
                       key={`${m.id}-${i}`}
-                      className="my-2 rounded-lg bg-neutral-900 font-mono text-sm overflow-hidden border border-neutral-800"
+                      className="my-2 overflow-hidden rounded-xl border border-neutral-800 bg-neutral-950 font-mono text-sm shadow-[4px_4px_0_0_var(--foreground)]"
                     >
-                      <div className="flex items-center gap-2 px-3 py-2 bg-neutral-800/50 border-b border-neutral-800 text-neutral-400">
-                        <svg
-                          className="size-4"
-                          xmlns="http://www.w3.org/2000/svg"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          strokeWidth={2}
-                          stroke="currentColor"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            d="m6.75 7.5 3 2.25-3 2.25m4.5 0h3m-9 8.25h13.5A2.25 2.25 0 0 0 21 18V6a2.25 2.25 0 0 0-2.25-2.25H5.25A2.25 2.25 0 0 0 3 6v12a2.25 2.25 0 0 0 2.25 2.25Z"
-                          />
-                        </svg>
-                        <span className="text-xs">
+                      <div className="flex items-center gap-2 border-b border-neutral-800 bg-neutral-900 px-3 py-2 text-neutral-400">
+                        <span aria-hidden="true" className="flex gap-1">
+                          <span className="size-2 rounded-full bg-neutral-100" />
+                          <span className="size-2 rounded-full border border-neutral-500" />
+                          <span className="size-2 rounded-full border border-neutral-700" />
+                        </span>
+                        <span className="text-[10px] uppercase tracking-[0.2em]">
                           {p.state === "output-available"
                             ? "Terminal"
                             : "Running…"}
@@ -200,7 +200,7 @@ export function AdminAgentChat({
             }),
           )}
           {label && (
-            <div className="my-2 flex items-center gap-2 text-sm text-muted-foreground">
+            <div className="my-2 flex items-center gap-2.5 font-mono text-[11px] uppercase tracking-[0.16em] text-muted-foreground">
               <Spinner />
               <span>{label}</span>
             </div>
@@ -218,7 +218,7 @@ export function AdminAgentChat({
         <ConversationScrollButton />
       </Conversation>
 
-      <div className="flex flex-col gap-3 border-t p-3">
+      <div className="flex flex-col gap-3 border-t border-foreground p-3">
         <Suggestions>
           {SUGGESTIONS.map((s) => (
             <Suggestion
@@ -226,10 +226,11 @@ export function AdminAgentChat({
               suggestion={s}
               onClick={send}
               disabled={isBusy}
+              className="border-foreground font-mono text-[11px] tracking-[0.04em] hover:bg-foreground hover:text-background"
             />
           ))}
         </Suggestions>
-        <PromptInput onSubmit={handleSubmit}>
+        <PromptInput onSubmit={handleSubmit} className={promptInputClass}>
           <PromptInputBody>
             <PromptInputTextarea
               value={input}

@@ -1,4 +1,5 @@
 import { ProductGrid } from "@/components/product-grid"
+import { SectionHeading } from "@/components/art/section-heading"
 import { getProducts } from "@/lib/api"
 import type { Product } from "@/lib/types"
 
@@ -32,11 +33,9 @@ export async function RelatedProducts({ product }: RelatedProductsProps) {
   if (related.length === 0) return null
 
   return (
-    <section className="mt-16 border-t border-border pt-16">
-      <h2 className="text-2xl font-semibold text-foreground">
-        You May Also Like
-      </h2>
-      <div className="mt-8">
+    <section className="mt-24">
+      <SectionHeading index="→" eyebrow="Related" title="You May Also Like" />
+      <div className="mt-10">
         <ProductGrid products={related} />
       </div>
     </section>

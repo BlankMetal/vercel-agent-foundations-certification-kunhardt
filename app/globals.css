@@ -28,7 +28,7 @@
   --chart-3: oklch(0.398 0.07 227.392);
   --chart-4: oklch(0.828 0.189 84.429);
   --chart-5: oklch(0.769 0.188 70.08);
-  --radius: 0.625rem;
+  --radius: 0.375rem;
   --sidebar: oklch(0.985 0 0);
   --sidebar-foreground: oklch(0.145 0 0);
   --sidebar-primary: oklch(0.205 0 0);
@@ -64,10 +64,10 @@
   --chart-3: oklch(0.769 0.188 70.08);
   --chart-4: oklch(0.627 0.265 303.9);
   --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.205 0 0);
+  --sidebar: oklch(0.17 0 0);
   --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-primary: oklch(0.985 0 0);
+  --sidebar-primary-foreground: oklch(0.205 0 0);
   --sidebar-accent: oklch(0.269 0 0);
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(0.269 0 0);
@@ -75,8 +75,8 @@
 }
 
 @theme inline {
-  --font-sans: 'Geist', 'Geist Fallback';
-  --font-mono: 'Geist Mono', 'Geist Mono Fallback';
+  --font-sans: var(--font-geist-sans), 'Geist', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), 'Geist Mono', ui-monospace, monospace;
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -119,8 +119,26 @@
   * {
     @apply border-border outline-ring/50;
   }
+  /*
+   * The page colour and the graph-paper dot grid live on <html>, not <body>,
+   * so the fixed <AmbientField /> layer (z-index -10) paints above the ground
+   * and below every in-flow block. A body background would cover it.
+   */
+  html {
+    background-color: var(--background);
+    background-image: radial-gradient(
+      color-mix(in oklch, var(--foreground) 11%, transparent) 1px,
+      transparent 1.2px
+    );
+    background-size: 28px 28px;
+    background-position: -14px -14px;
+  }
   body {
-    @apply bg-background text-foreground;
+    @apply text-foreground;
+  }
+  ::selection {
+    background: var(--foreground);
+    color: var(--background);
   }
 }
 
@@ -137,4 +155,128 @@
 .agent-panel-booting [data-mobile='true'][data-slot='sidebar'] {
   transition: none !important;
   animation: none !important;
+}
+
+/* ------------------------------------------------------------------------- */
+/* Art direction: Ponti tiles, Kandinsky swoops, Manifold Garden recursion.   */
+/* Every looping animation below is switched off under reduced motion.        */
+/* ------------------------------------------------------------------------- */
+
+@theme {
+  --animate-marquee: marquee 48s linear infinite;
+  --animate-spin-slow: spin-cw 90s linear infinite;
+  --animate-spin-slower: spin-cw 180s linear infinite;
+  --animate-spin-reverse: spin-reverse 140s linear infinite;
+  --animate-orbit: spin-cw 2.4s linear infinite;
+  --animate-draw: draw 2.4s cubic-bezier(0.65, 0, 0.35, 1) both;
+  --animate-float: float 9s ease-in-out infinite;
+  --animate-breathe: breathe 7s ease-in-out infinite;
+  --animate-rise: rise 0.9s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+
+  @keyframes marquee {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+  @keyframes spin-cw {
+    to { transform: rotate(360deg); }
+  }
+  @keyframes spin-reverse {
+    to { transform: rotate(-360deg); }
+  }
+  @keyframes draw {
+    from { stroke-dashoffset: 1; }
+    to { stroke-dashoffset: 0; }
+  }
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+  }
+  @keyframes breathe {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.06); }
+  }
+  @keyframes rise {
+    from { opacity: 0; transform: translateY(14px); }
+    to { opacity: 1; transform: none; }
+  }
+}
+
+/* A Ponti tile turns a quarter at a time, holding each pose. Ending on 360deg
+ * lands back on the starting pose, so the loop never snaps. */
+@keyframes tile-turn {
+  0%, 21% { transform: rotate(0deg); }
+  25%, 46% { transform: rotate(90deg); }
+  50%, 71% { transform: rotate(180deg); }
+  75%, 96% { transform: rotate(270deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* The isometric cube field falls by exactly one pattern period per loop. */
+@keyframes iso-fall {
+  from { transform: translateY(0); }
+  to { transform: translateY(var(--iso-period)); }
+}
+
+/* SVG elements default to transform-box: view-box, so rotations would pivot
+ * on the SVG origin. Every tile carries a 100x100 hit rect, which makes its
+ * fill-box the tile cell. */
+.tile-turn {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: tile-turn 24s cubic-bezier(0.7, 0, 0.2, 1) infinite;
+}
+.tile-cell .tile-spin {
+  transform-box: fill-box;
+  transform-origin: center;
+  transition: transform 700ms cubic-bezier(0.7, 0, 0.2, 1);
+}
+.tile-cell:hover .tile-spin {
+  transform: rotate(90deg);
+}
+.iso-fall {
+  animation: iso-fall 14s linear infinite;
+}
+.svg-spin {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+/* Pointer parallax for the hero: each layer reads --px/--py (-1..1) from the
+ * composition root and offsets by its own --depth. `translate` is used rather
+ * than `transform` so it composes with rotation animations on the same node. */
+.parallax {
+  translate: calc(var(--px, 0) * var(--depth, 0px)) calc(var(--py, 0) * var(--depth, 0px));
+  transition: translate 900ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+/* Theme toggle glyph: half-filled disc rotates to show the other half. */
+.theme-glyph {
+  transition: rotate 700ms cubic-bezier(0.7, 0, 0.2, 1);
+}
+.dark .theme-glyph {
+  rotate: 180deg;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tile-turn,
+  .iso-fall,
+  .parallax,
+  [class*='animate-marquee'],
+  [class*='animate-spin-slow'],
+  [class*='animate-spin-slower'],
+  [class*='animate-spin-reverse'],
+  [class*='animate-float'],
+  [class*='animate-breathe'],
+  [class*='animate-rise'] {
+    animation: none !important;
+    translate: none !important;
+    transition: none !important;
+  }
+  [class*='animate-draw'] {
+    animation: none !important;
+    stroke-dashoffset: 0 !important;
+  }
+  .tile-cell:hover .tile-spin {
+    transform: none;
+  }
 }

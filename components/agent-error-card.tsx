@@ -103,7 +103,7 @@ export function AgentErrorCard({
   };
 
   return (
-    <Alert variant="destructive" className="my-2">
+    <Alert variant="destructive" className="my-2 rounded-xl border-destructive/50 border-l-4">
       <AlertCircle aria-hidden="true" />
       <AlertTitle>{title}</AlertTitle>
       <AlertDescription>
@@ -113,16 +113,16 @@ export function AgentErrorCard({
         )}
         <div className="mt-2 flex flex-wrap gap-2">
           {kind === "auth" && audience === "staff" ? (
-            <Button asChild size="sm">
+            <Button asChild size="sm" className="rounded-full">
               <Link href="/admin/login">Sign in again</Link>
             </Button>
           ) : (
-            <Button size="sm" onClick={onRetry}>
+            <Button size="sm" className="rounded-full" onClick={onRetry}>
               <RotateCcw aria-hidden="true" />
               Try again
             </Button>
           )}
-          <Button size="sm" variant="outline" onClick={copyDetails}>
+          <Button size="sm" variant="outline" className="rounded-full" onClick={copyDetails}>
             {copyState === "copied" ? <Check aria-hidden="true" /> : <Copy aria-hidden="true" />}
             {copyState === "copied"
               ? "Copied"

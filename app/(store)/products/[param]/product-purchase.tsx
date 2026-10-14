@@ -5,6 +5,7 @@ import { Check, Minus, Plus } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useCart } from "@/components/cart-provider"
 import { getProductStockAction } from "@/lib/cart-actions"
+import { PhaseGlyph, TileGlyph } from "@/components/art/tiles"
 import type { Product, StockInfo } from "@/lib/types"
 
 interface ProductPurchaseProps {
@@ -67,72 +68,85 @@ export function ProductPurchase({ product }: ProductPurchaseProps) {
     }, 2000)
   }
 
+  const phase = isLoadingStock
+    ? "unknown"
+    : isOutOfStock
+      ? "empty"
+      : isLowStock
+        ? "half"
+        : "full"
+
   return (
     <>
-      <div className="mt-4">
+      <p className="mt-6 inline-flex items-center gap-2.5 text-sm" aria-live="polite">
+        <PhaseGlyph phase={phase} />
         {isLoadingStock ? (
-          <span className="inline-flex items-center rounded-full bg-secondary px-3 py-1 text-sm text-muted-foreground">
-            Checking availability…
-          </span>
+          <span className="text-muted-foreground">Checking availability…</span>
         ) : isOutOfStock ? (
-          <span className="inline-flex items-center rounded-full bg-secondary px-3 py-1 text-sm text-muted-foreground">
-            Out of stock
-          </span>
+          <span className="text-muted-foreground">Out of stock</span>
         ) : isLowStock ? (
-          <span className="inline-flex items-center rounded-full bg-secondary px-3 py-1 text-sm text-foreground">
-            Only {stock.stock} left in stock
-          </span>
+          <span>Only {stock.stock} left in stock</span>
         ) : (
-          <span className="inline-flex items-center rounded-full bg-secondary px-3 py-1 text-sm text-foreground">
-            In stock
-          </span>
+          <span>In stock</span>
         )}
-      </div>
+      </p>
 
-      <div className="mt-8">
-        <label className="text-sm font-medium text-foreground">Quantity</label>
-        <div className="mt-2 flex items-center gap-3">
+      <div className="mt-10 flex flex-col gap-3 sm:flex-row sm:items-stretch">
+        <div
+          role="group"
+          aria-label="Quantity"
+          className="inline-flex h-12 items-center justify-between rounded-full border border-foreground p-1 sm:w-40"
+        >
           <Button
-            variant="outline"
+            variant="ghost"
             size="icon"
             onClick={handleDecrement}
             disabled={quantity <= 1 || isOutOfStock}
             aria-label="Decrease quantity"
+            className="rounded-full"
           >
             <Minus className="h-4 w-4" />
           </Button>
-          <span className="w-12 text-center text-lg font-medium tabular-nums">
+          <span className="w-10 text-center font-mono text-base tabular-nums" aria-live="polite">
             {quantity}
           </span>
           <Button
-            variant="outline"
+            variant="ghost"
             size="icon"
             onClick={handleIncrement}
             disabled={quantity >= maxQty || isOutOfStock}
             aria-label="Increase quantity"
+            className="rounded-full"
           >
             <Plus className="h-4 w-4" />
           </Button>
         </div>
-      </div>
 
-      <Button
-        size="lg"
-        onClick={handleAddToCart}
-        disabled={isOutOfStock || isLoadingStock}
-        className="mt-8 w-full sm:w-auto"
-      >
-        {isAdded ? (
-          <>
-            <Check className="mr-2 h-4 w-4" />
-            Added to Cart
-          </>
-        ) : isOutOfStock ? (
-          "Out of Stock"
-        ) : (
-          "Add to Cart"
-        )}
-      </Button>
+        <Button
+          size="lg"
+          onClick={handleAddToCart}
+          disabled={isOutOfStock || isLoadingStock}
+          className="group h-12 flex-1 rounded-full text-sm"
+        >
+          {isAdded ? (
+            <>
+              <Check className="mr-1 h-4 w-4" />
+              Added to Cart
+            </>
+          ) : isOutOfStock ? (
+            "Out of Stock"
+          ) : (
+            <>
+              Add to Cart
+              <TileGlyph
+                motif="quarter"
+                className="size-3.5 transition-transform duration-500 group-hover:rotate-90"
+                paper="var(--primary)"
+              />
+            </>
+          )}
+        </Button>
+      </div>
     </>
   )
 }
