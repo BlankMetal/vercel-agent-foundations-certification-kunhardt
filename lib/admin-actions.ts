@@ -2,17 +2,21 @@
 
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { ADMIN_COOKIE_NAME, ADMIN_PASSWORD } from "./admin-auth";
+import { ADMIN_COOKIE_NAME, adminSessionToken, getAdminPassword } from "./admin-auth";
 
 const COOKIE_MAX_AGE = 60 * 60 * 24; // 1 day
 
 export async function loginAction(formData: FormData): Promise<void> {
+  const expected = getAdminPassword();
+  if (!expected) {
+    redirect("/admin/login?error=unconfigured");
+  }
   const password = formData.get("password");
-  if (typeof password !== "string" || password !== ADMIN_PASSWORD) {
-    redirect("/admin/login?error=1");
+  if (typeof password !== "string" || password !== expected) {
+    redirect("/admin/login?error=password");
   }
   const store = await cookies();
-  store.set(ADMIN_COOKIE_NAME, ADMIN_PASSWORD, {
+  store.set(ADMIN_COOKIE_NAME, await adminSessionToken(expected), {
     httpOnly: true,
     sameSite: "lax",
     secure: process.env.NODE_ENV === "production",

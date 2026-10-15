@@ -1,12 +1,9 @@
 # Ship It Shop
 
-Submission for the Vercel Agent Foundations Certification. Ship It Shop is a Next.js storefront for Vercel swag, backed by the live Vercel Swag Store API, with three agents built on top of it:
+Submission for the Vercel Agent Foundations Certification. Ship It Shop is a Next.js storefront for Vercel swag, backed by the live Vercel Swag Store API, with two agents built on top of it:
 
 - **Shopping assistant** (side panel on every store page): finds and compares products, answers questions about a specific item with live stock, and starts returns after the shopper confirms.
 - **Store admin agent** (`/admin`): answers back-office questions about sales, returns, inventory, and support tickets, computing exact figures in a Vercel Sandbox, and keeps shared notes and reusable report scripts between conversations.
-- **Back-office agent** (`my-agent/`): a standalone [eve](https://eve.dev) project with the same back-office data tools, two skills (weekly briefing, product ideation), a research subagent, and a Vercel MCP connection.
-
-Production deployment: https://vercel-agent-foundations-certificat-omega-eight.vercel.app
 
 ## Running locally
 
@@ -18,7 +15,7 @@ vercel link                    # link this directory to your Vercel project
 vercel env pull .env.local     # writes VERCEL_OIDC_TOKEN, plus any project env vars
 ```
 
-`vercel env pull` overwrites `.env.local`. If `BYPASS_SECRET` isn't stored in the Vercel project's Development environment, add it to `.env.local` after pulling (see `.env.example`). Then:
+`vercel env pull` overwrites `.env.local`. If `BYPASS_SECRET` and `ADMIN_PASSWORD` aren't stored in the Vercel project's Development environment, add them to `.env.local` after pulling (see `.env.example`). `ADMIN_PASSWORD` is any password you choose. Then:
 
 ```bash
 pnpm dev                       # http://localhost:3000
@@ -33,44 +30,24 @@ The local OIDC token expires after about 12 hours. When agent requests start fai
 | Storefront | `/`, `/search`, `/products/<id or slug>`; the cart opens from the header |
 | Shopping assistant | The orbit icon in the header, or "Ask the agent" on the homepage. The panel's open state is kept in a `?chat=open` URL param |
 | Returns | Ask the assistant to return an order. The API's sample order IDs are `11111`, `22222`, and `33333`. The assistant asks for confirmation in the chat before anything runs |
-| Store admin agent | `/admin`, signing in at `/admin/login` with the demo password `letmeinadminagent` (see [Admin access](#admin-access)) |
-
-### Running the eve agent
-
-```bash
-cd my-agent
-pnpm install
-cp .env.example .env.local     # fill in API_BASE_URL and BYPASS_SECRET
-pnpm dev                       # eve dev: opens the interactive terminal UI
-```
-
-On first run, eve asks for a model credential in the terminal UI: sign in with a Vercel account (it checks the team's AI Gateway access) or paste an AI Gateway key. The Vercel MCP connection asks you to authorize Vercel in the browser the first time a tool uses it.
+| Store admin agent | `/admin`, signing in at `/admin/login` with the `ADMIN_PASSWORD` you set (see [Admin access](#admin-access)) |
 
 ## Environment variables
 
-Templates with every name and no values: [`.env.example`](.env.example) for the app and [`my-agent/.env.example`](my-agent/.env.example) for the eve agent. Both `.env.local` files are gitignored.
-
-### App (repository root)
+[`.env.example`](.env.example) lists every variable with no values. `.env.local` is gitignored.
 
 | Variable | Required | Description |
 | --- | --- | --- |
 | `BYPASS_SECRET` | Yes | Deployment-protection bypass secret for the Vercel Swag Store API, provided with the certification. Sent as the `x-vercel-protection-bypass` header on every API call. Server-only: it must never get a `NEXT_PUBLIC_` prefix. |
+| `ADMIN_PASSWORD` | Yes, for `/admin` | Password for the store admin sign-in. Choose your own. If it is unset, the login page refuses every attempt and the admin agent is unreachable; the storefront and shopping assistant still work. |
 | `VERCEL_OIDC_TOKEN` | Yes, locally | Authenticates AI Gateway (all model calls) and Vercel Sandbox (the admin agent's `bash` tool). Written by `vercel env pull`; on Vercel deployments it is injected automatically, so don't set it there. |
 | `AI_GATEWAY_API_KEY` | No | Alternative AI Gateway credential. If set, model calls use it instead of the OIDC token. Sandbox still needs `VERCEL_OIDC_TOKEN`. |
 | `API_BASE_URL` | No | Swag Store API base URL. Defaults to `https://vercel-agentic-swag-store-api.vercel.app/api`. |
 | `NEXT_PUBLIC_SITE_URL` | No | Public site URL used for metadata and Open Graph links. Defaults to `http://localhost:3000`. |
 
-### eve agent (`my-agent/`)
-
-| Variable | Required | Description |
-| --- | --- | --- |
-| `API_BASE_URL` | Yes | Swag Store API base URL, e.g. `https://vercel-agentic-swag-store-api.vercel.app/api`. Unlike the app, the eve agent has no default. |
-| `BYPASS_SECRET` | Yes | Same Swag Store API bypass secret as the app. |
-| `AI_GATEWAY_API_KEY` | No | Model credential for deployments. Locally, eve's terminal UI connects a credential for you; deployed agents need it set on the Vercel project. |
-
 ## Deploying
 
-Merges to `main` deploy to Vercel. In the Vercel project, set `BYPASS_SECRET` for Production and Preview. AI Gateway and Sandbox authenticate with the deployment's OIDC token, so they need no keys. Durable chats run on Vercel Workflow, wired in by `withWorkflow()` in `next.config.mjs`.
+Import the repository into a Vercel project (or run `vercel deploy` from a linked directory). In the project, set `BYPASS_SECRET` and `ADMIN_PASSWORD` for Production and Preview. AI Gateway and Sandbox authenticate with the deployment's OIDC token, so they need no keys. Durable chats run on Vercel Workflow, wired in by `withWorkflow()` in `next.config.mjs`.
 
 `pnpm build` should report `/` as static (`○`), `/products/[param]` as SSG (`●`), and `/search` as dynamic (`ƒ`).
 
@@ -119,13 +96,12 @@ components/
   agent-*.tsx               shopping assistant UI and product cards
   admin-*.tsx               admin workspace, chat, and history drawer
   ui/, ai-elements/         shadcn/ui and AI Elements components
-my-agent/                   standalone eve back-office agent
 proxy.ts                    admin gate for /admin and /api/admin
 ```
 
 ## Admin access
 
-The admin gate is the demo gate supplied by the certification scaffold: a hardcoded password in `lib/admin-auth.ts`, stored as the cookie value after sign-in. It keeps casual visitors out of `/admin` and is not real authentication.
+The admin gate (`lib/admin-auth.ts`, `proxy.ts`) is a single shared password read from `ADMIN_PASSWORD`. After sign-in, an `httpOnly` cookie holds a SHA-256 digest of the password, so the password itself never sits in the browser and changing it signs everyone out. It keeps casual visitors out of `/admin`, but it is not user authentication: there are no accounts, and a copied cookie stays valid until the password changes.
 
 ## Limitations
 

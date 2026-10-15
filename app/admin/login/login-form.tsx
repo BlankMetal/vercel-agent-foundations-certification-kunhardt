@@ -7,11 +7,18 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Spinner } from "@/components/ui/spinner";
 
+const ERROR_MESSAGES = {
+  password: "Incorrect password.",
+  unconfigured: "Admin sign-in is disabled until ADMIN_PASSWORD is set on the server.",
+} as const;
+
+export type LoginError = keyof typeof ERROR_MESSAGES;
+
 interface LoginFormProps {
-  hasError: boolean;
+  error?: LoginError;
 }
 
-export function LoginForm({ hasError }: LoginFormProps) {
+export function LoginForm({ error }: LoginFormProps) {
   return (
     <form action={loginAction} className="flex flex-col gap-4">
       <div className="flex flex-col gap-2">
@@ -31,8 +38,8 @@ export function LoginForm({ hasError }: LoginFormProps) {
           className="h-12 rounded-full border-foreground bg-background px-5 shadow-none"
         />
       </div>
-      {hasError && (
-        <p role="alert" className="text-sm text-destructive">Incorrect password.</p>
+      {error && (
+        <p role="alert" className="text-sm text-destructive">{ERROR_MESSAGES[error]}</p>
       )}
       <SubmitButton />
     </form>

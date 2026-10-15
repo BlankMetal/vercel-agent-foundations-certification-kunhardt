@@ -26,6 +26,7 @@ There is no test framework wired up.
 `.env.local` (gitignored) holds:
 
 - `BYPASS_SECRET` — required. Sent as the `x-vercel-protection-bypass` header on every API call. Must never be exposed to the client (no `NEXT_PUBLIC_` prefix).
+- `ADMIN_PASSWORD` — required for `/admin`. Shared password for the admin gate (`lib/admin-auth.ts`); while unset, sign-in is disabled. The `admin_auth` cookie holds a SHA-256 digest of it, never the password.
 - `API_BASE_URL` — optional. Defaults to `https://vercel-agentic-swag-store-api.vercel.app/api` in `lib/api.ts`.
 
 `.env.example` is the redacted template for new developers.
@@ -77,7 +78,7 @@ Everything else (`Header`, `Footer`, `ProductCard`, `ProductGrid`, `PromoBanner`
 
 - `next.config.mjs` keeps `typescript.ignoreBuildErrors: true` and `images.unoptimized: true`. `images.remotePatterns` is whitelisted for `**.public.blob.vercel-storage.com` and `**.vercel-storage.com` (where API product images live); add hostnames here if the API ever returns images from a new domain.
 - `@vercel/analytics` only mounts when `NODE_ENV === 'production'` (see `app/layout.tsx`).
-- The repo is linked to v0 (`https://v0.app/chat/projects/prj_X7UGePkFlLC33RuxWiTZySFDcSzO`); merges to `main` auto-deploy via Vercel. v0 may push commits directly. When deploying, set `BYPASS_SECRET` in the Vercel project's environment variables.
+- When deploying, set `BYPASS_SECRET` and `ADMIN_PASSWORD` in the Vercel project's environment variables.
 - The root layout is intentionally synchronous so it doesn't opt routes out of static. `pnpm build` should report `/` as `○` (Static), `/products/[param]` as `●` (SSG), and `/search` as `ƒ` (Dynamic). If you ever convert the layout to `async function` and `await` something that uses `cookies()`/`headers()`/`searchParams`, you will silently switch every route back to dynamic — verify the build output after layout changes.
 
 <!-- BEGIN:nextjs-agent-rules -->

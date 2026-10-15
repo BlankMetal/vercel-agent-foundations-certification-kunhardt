@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { IsometricField } from "@/components/art/isometric-field";
 import { ShopMark } from "@/components/art/shop-mark";
 import { Eyebrow } from "@/components/art/section-heading";
-import { LoginForm } from "./login-form";
+import { LoginForm, type LoginError } from "./login-form";
 
 export const metadata: Metadata = {
   title: "Sign in",
@@ -14,6 +14,8 @@ interface LoginPageProps {
 
 export default async function AdminLoginPage({ searchParams }: LoginPageProps) {
   const { error } = await searchParams;
+  const loginError: LoginError | undefined =
+    error === "unconfigured" ? "unconfigured" : error ? "password" : undefined;
   return (
     <div className="grid min-h-screen lg:grid-cols-[1.1fr_1fr]">
       {/* An endless fall through stacked cubes. */}
@@ -50,7 +52,7 @@ export default async function AdminLoginPage({ searchParams }: LoginPageProps) {
             Enter the admin password to open the store agent.
           </p>
           <div className="mt-10">
-            <LoginForm hasError={Boolean(error)} />
+            <LoginForm error={loginError} />
           </div>
         </div>
       </div>
