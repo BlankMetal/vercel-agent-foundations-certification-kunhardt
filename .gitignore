@@ -16,8 +16,9 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# env files
+# env files (the redacted template is committed)
 .env*
+!.env.example
 
 # vercel
 .vercel
